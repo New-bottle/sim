@@ -10,20 +10,6 @@ with open(train_file, 'rb') as f:
 	X_tmp = np.array(pickle.load(f))
 	Y_data = np.array(pickle.load(f))
 
-with open(test_file, 'rb') as f:
-	X_test = np.array(pickle.load(f))
-
-print ('-------------------LOAD END----------------------')
-
-input_num = 2+5+4+32+32
-learning_rate = 0.10
-iterations = 1000
-batch_size = 100000
-drop_keep_prob = 0.90
-hid1 = 200
-hid2 = 100
-output = 1
-
 X_data = []
 for each in X_tmp:
 	tmp5 = np.zeros(5)
@@ -41,35 +27,48 @@ for each in X_tmp:
 	tmp.extend(tmp32_2)
 	X_data.append(tmp)
 
+with open(test_file, 'rb') as f:
+	X_test = np.array(pickle.load(f))
+
+print ('-------------------LOAD END----------------------')
+
+input_num = 2+5+4+32+32
+learning_rate = 0.02
+iterations = 1000
+batch_size = 100000
+drop_keep_prob = 0.90
+hid1 = 200
+hid2 = 100
+output = 1
+
+
 X_data = np.array(X_data)
 Y_data = np.array(Y_data)
 Y_data = Y_data.reshape(100000,1)
 # print X_data[0]
 L = [input_num, 200, 100, 1]
-LAYERS = len(L) - 1
+LAYERS = len(L)
 
 keep_prob = tf.placeholder("float")
 x = tf.placeholder(tf.float32, shape=[None,input_num], name="input")
 def weight_variable(shape):
-	initial = tf.random_normal(shape, stddev = 0.1)
+	initial = tf.random_normal(shape, stddev = 0.001)
 	return tf.Variable(initial)
 def bias_variable(shape):
 	initial = tf.constant(0.1, shape = shape)
 	return tf.Variable(initial)
 
-W = list(range(LAYERS + 1))
-b = list(range(LAYERS + 1))
-yt = list(range(LAYERS+ 1))
+W = list(range(LAYERS))
+b = list(range(LAYERS))
+yt = list(range(LAYERS))
 yt[0] = x
-for i in range(LAYERS):
+for i in range(LAYERS - 1):
 	W[i + 1] = weight_variable([L[i], L[i + 1]])
 	b[i + 1] = bias_variable([L[i + 1]])
 
-for i in range(LAYERS):
-	if i == LAYERS - 1:
-		yt[i] = tf.nn.dropout(yt[i], keep_prob)
-	yt[i + 1] = tf.nn.sigmoid(tf.matmul(yt[i], W[i + 1]) + b[i + 1])
-y = tf.nn.softmax(yt[LAYERS])
+for i in range(LAYERS - 1):
+	yt[i + 1] = tf.matmul(yt[i], W[i + 1]) + b[i + 1]
+y = yt[LAYERS - 1]
 '''
 w1 = tf.Variable(tf.random_normal([input_num, hid1]))
 w2 = tf.Variable(tf.random_normal([hid1,output]    ))
@@ -82,7 +81,7 @@ y = tf.matmul(a, w2) + b2
 '''
 y_ = tf.placeholder(tf.float32, shape=(None, 1), name = "label")
 
-loss = tf.reduce_mean(tf.reduce_sum(tf.square(y_ - y), reduction_indices=[1]))
+loss = tf.reduce_mean(tf.reduce_sum(y_ - y, reduction_indices=[1]))
 train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
 
 init = tf.global_variables_initializer()
@@ -109,7 +108,7 @@ if BATCH:
 		if i % (iterations // 10) == 0:
 			print ('Process: {}%'.format((i // (iterations // 10) + 1) * 10))
 			print ('y_:', sess.run(y_[0], feed_dict = {x: batch_x, y_: batch_y_, keep_prob: 1}))
-			print ('y:',  sess.run(y[0],  feed_dict = {x: batch_x, y_: batch_y_, keep_prob: 1}))
+			print ('y:',  sess.run(y [0], feed_dict = {x: batch_x, y_: batch_y_, keep_prob: 1}))
 			print ('loss:', sess.run(loss,feed_dict = {x: batch_x, y_: batch_y_, keep_prob: 1}))
 			correct_prediction = mape(y_, y)
 			print ('MAPE:', sess.run(correct_prediction, feed_dict = {x: X_val, y_: y_val, keep_prob: 1}))
@@ -119,8 +118,8 @@ else:
 		if i % (iterations // 100) == 0:
 			#			print 'w1:', sess.run(w1[0], feed_dict = {x: X_data, y_: Y_data})
 			print ('Process: {}%'.format((i // (iterations // 100) + 1) * 1))
-			print ('y_:', sess.run(y_[0], feed_dict = {x: X_data, y_: Y_data, keep_prob: 1}))
-			print ('y:',  sess.run(y[0],  feed_dict = {x: X_data, y_: Y_data, keep_prob: 1}))
+			print ('y_:', sess.run(y_[5], feed_dict = {x: X_data, y_: Y_data, keep_prob: 1}))
+			print ('y:',  sess.run(y [5], feed_dict = {x: X_data, y_: Y_data, keep_prob: 1}))
 			print ('loss:', sess.run(loss,feed_dict = {x: X_data, y_: Y_data, keep_prob: 1}))
 			correct_prediction = mape(y_, y)
 			print ('MAPE:', sess.run(correct_prediction, feed_dict = {x: X_val, y_: y_val, keep_prob: 1.0}))
