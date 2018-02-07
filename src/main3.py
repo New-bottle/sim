@@ -3,8 +3,11 @@ import numpy as np
 import pickle
 
 print ('------------------LOAD START---------------------')
-train_file = '../data/training.pk1'
-test_file = '../data/test.pk1'
+# train_file = '../data/training.pk1'
+# test_file = '../data/test.pk1'
+
+train_file = r'..\data\training.pk1'
+test_file = r'..\data\test.pk1'
 
 with open(train_file, 'rb') as f:
 	X_tmp = np.array(pickle.load(f))

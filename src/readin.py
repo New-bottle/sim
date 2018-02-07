@@ -1,6 +1,6 @@
 import pandas as pd
 import pickle
-import xgboost as xgb
+# import xgboost as xgb
 import csv
 
 training_file = "../data/training_data.csv"
